@@ -1,0 +1,1073 @@
+<div class="layui-fluid">
+    <div class="layui-card">
+        <!-- <div class="layui-card-header">表单组合</div> -->
+        <div class="layui-card-body" style="padding: 15px;">
+            <form class="layui-form" lay-filter="component-form-group">
+
+
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <!-- <label class="layui-form-label">验证手机</label> -->
+                        <div class="layui-input-inline">
+                            <select name="commonStatus" lay-verify="required" lay-search="">
+                                <option value="-1">全部</option>
+                                <option value="0" selected>未批改</option>
+                                <option value="1">批改中</option>
+                                <option value="2">已批改</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select id="allTeacherListSelect" name="assistTeacherId" lay-verify="required"
+                                lay-search="">
+                                <option value="0">全部助教</option>
+                                <option value="1000000020">sst</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select name="isAssistData" lay-verify="required" lay-search="">
+                                <option value="1" selected>助教绩效</option>
+                                <option value="0">全部</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select name="stage" lay-search="">
+                                <option value="">全部等级</option>
+                                <option value="L1">L1</option>
+                                <option value="L2">L2</option>
+                                <option value="L3">L3</option>
+                                <option value="L4">L4</option>
+                                <option value="L5">L5</option>
+                                <option value="L6">L6</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select id="allCourseListSelect" name="courseId" lay-verify="required" lay-search=""
+                                lay-filter="allCourseListSelect">
+                                <option value="0">全部课程</option>
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select id="allLessonListSelect" name="lessonId" lay-verify="required" lay-search=""
+                                lay-filter="allLessonListSelect">
+                                <option value="0">全部课节</option>
+
+                            </select>
+                        </div>
+                        <div class="layui-input-inline">
+                            <select id="allSectionListSelect" name="sectionId" lay-verify="required" lay-search=""
+                                lay-filter="allSectionListSelect">
+                                <option value="0">全部小节</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="layui-inline">
+                        <!-- <label class="layui-form-label">批改时间</label> -->
+                        <div class="layui-input-inline">
+                            <input type="text" name="subTime" class="layui-input " id="sub-laydate-range-datetime"
+                                placeholder="提交时间">
+                        </div>
+                        <div class="layui-input-inline">
+
+                            <!-- corStartTime:  corEndTime -->
+                            <input type="text" name="corTime" class="layui-input" id="cor-laydate-range-datetime"
+                                placeholder="批改时间">
+
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" name="className" class="layui-input" placeholder="班级名称">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" name="studentId" class="layui-input" placeholder="学生ID">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" name="userName" class="layui-input" placeholder="学生姓名">
+                        </div>
+                        <div class="layui-input-inline">
+                            <input type="text" name="workId" class="layui-input" placeholder="作业ID">
+                        </div>
+                        <!-- <div class="layui-input-inline">
+                            <input type="checkbox" name="close" lay-skin="switch" lay-text="ON|OFF">
+                        </div> -->
+                    </div>
+
+                    <div class="layui-inline">
+                        <!-- <label class="layui-form-label">参数</label> -->
+
+                        <div class="layui-input-inline">
+                            <button class="layui-btn" lay-submit="" lay-filter="getWorkList" lay-tips="筛选">确定</button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <!-- <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">普通文本域</label>
+                    <div class="layui-input-block">
+                        <textarea name="text" placeholder="请输入内容" class="layui-textarea"></textarea>
+                    </div>
+                </div> -->
+
+            </form>
+
+
+        </div>
+    </div>
+
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table id="workListTable" lay-filter="workListTable"></table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="beginJudgeWorks">批改选中作业</button>
+        <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+    </div>
+</script>
+<script type="text/html" id="barEdit">
+    <a class="layui-btn layui-btn-xs" lay-event="setNoComment">设未</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="answer">答案</a>
+</script>
+
+<script id="templateOption" type="text/html">
+    {{#  layui.each(d.data.data, function(index, item){ }}
+    <option value='{{item[d.value]}}'>{{item[d.name]}}</option>
+    {{#  }); }}
+</script>
+
+<!-- //表格状态魔板 -->
+<script type="text/html" id="StatusTpl">
+    {{#  if(d.Status == '已批改'){ }}
+    <button class="layui-btn layui-btn-danger layui-btn-xs">已批改</button>
+    {{#  } else if(d.Status == '未批改'){ }}
+    <button class="layui-btn layui-btn-normal layui-btn-xs">未批改</button>
+    {{#  } else{ }}
+    <button class="layui-btn layui-btn-warm layui-btn-xs">批改中</button>
+    {{#  } }}
+</script>
+
+<!-- 头像魔板 -->
+<script type="text/html" id="imgTpl">
+    <img style="display: inline-block; width: 100%; height: 100%;" src={{ d.Headphoto }}>
+</script>
+<script>
+    //========================== init ============================
+    var G$ = null;
+    var Glayer = null;
+    var windowW = 1920;
+    var windowH = 978;
+    var GZIndex = 199824; //全局最高 index 属性 哈哈，我生日
+    var JWQueue = []; //主要用于存储 作业对象，实现 异步打开JW窗口
+    var WWQueue = []; //  WW 窗口队列
+    var haveOpened = false; //当前是否有打开的窗口 
+    var divTime = 2000;  //相邻窗口打开间隔时间
+    var onlineNum = 0; // 当前 弹出 窗口 数目
+    var maxOnlineNum = 2; //最多 同时 窗口存在数目 受限了浏览器 页面性能，不建议开太大
+    //全局URL
+    var getAllTeacherListUrl = `http://cbadminapi.knowbox.cn/v1/teacher/getAllTeacherList`;
+    //获取所有课程
+    var getAllCourseListUrl = `http://cbadminapi.knowbox.cn/v1/course/getAllCourseList`;
+    //根据课程获取课节 CourseId
+    var getLessonListByCourseIdUrl = `http://cbadminapi.knowbox.cn/v1/lesson/getLessonListByCourseId`;
+    //根据课节id获取aLL 小节 LessonId
+    getLessonSectionListByLessonIdUrl = `http://cbadminapi.knowbox.cn/v1/lessonSection/getLessonSectionListByLessonId`;
+
+    //抢占作业 post token worksId
+    var getWorkUrl = `http://cbadminapi.knowbox.cn/v1/work/getWork`;
+
+    // 得到 work详情 worksId
+    var getWorkByIdUrl = `http://cbadminapi.knowbox.cn/v1/work/getWorkById`;
+
+    //设置未点评
+    var setUnCheckUrl = `http://cbadminapi.knowbox.cn/v1/work/setUnCheckStudentWork`
+
+    //测试  临时token
+    var tokenT = `3gZUjvMSEhYL43_q07hMhgj8pZkDGntOBt5WLHmRchIixKc=`;
+
+    //做一些初始化配置
+    function init() {
+        windowH = G$(window).height();
+        windosW = G$(window).width();
+    }
+
+    // 验证登录
+    function checkLoginStatus() {
+        let teacherTable = layui.data("teacherTable");
+        if (!teacherTable.token) {
+            Glayer.msg("请先登录", {
+                icon: 2
+            });
+            window.open("/start/index.html?sendMsg=on#/user/login", "_blank");
+            // location.href = '/start/index.html?sendMsg=on#/user/login'
+        }
+    }
+    //=================== storage =======================================
+
+    var stg = {
+        saveJudgeWork: function (work) {
+            let teacherTable = layui.data('JudgeRecord');
+            let worksId = work.getWorksid;
+            layui.data("JudgeRecord", "w" + worksId, work);
+        },
+        saveSendedWork: function (work) {
+            let teacherTable = layui.data('JudgeRecord');
+            let worksId = work.getWorksid;
+            //设置属性
+            work.sended = true;
+            layui.data("JudgeRecord", "w" + worksId, work);
+        }
+    }
+
+
+    //==================== method ========================================
+    var method = {
+        //对 post、数据进行处理
+        dataOpt: function (data) {
+                let adata = {};
+                adata.className = data.className || "";
+                adata.userName = data.userName || ""; //TODO
+                adata.commonStatus = data.commonStatus || 1;
+                adata.stage = data.stage || "";
+                adata.courseId = data.courseId || 0;
+                adata.lessonId = data.lessonId || 0;
+                adata.rankOff = -2;
+                //adata.pageNum = data.pageNum || 1;  //在request中传
+                adata.nickName = "";
+                adata.mobile = "";
+                adata.workType = 1
+                adata.studentId = data.studentId || 0;
+                adata.assistTeacherId = data.assistTeacherId || 0;
+                adata.sScore = 0;
+                adata.eScore = 0;
+                adata.isBuy = 0;
+                adata.workId = data.workId || 0;
+                adata.isAssistData = data.isAssistData || 0;
+                adata.sectionId = data.sectionId || 0;
+                adata.startTime = data.subTime.split(" - ")[0] || "";
+                adata.endTime = data.subTime.split(" - ")[1] || "";
+                adata.corStartTime = data.corTime.split(" - ")[0] || "";
+                adata.corEndTime = data.corTime.split(" - ")[1] || "";
+                return adata;
+            }
+
+            ,
+
+        //作业列表
+        showWorkListTable: function (table, data) {
+            table.render({
+                elem: '#workListTable',
+
+                url: 'http://cbadminapi.knowbox.cn/v1/work/getWorkList',
+                toolbar: "#toolbar",
+                method: "POST",
+                where: data,
+                totalRow: true, //合计行区域
+                page: true //开启分页
+                    ,
+                limit: 1,
+                cols: [
+                    [ //表头
+                        {
+                            type: 'checkbox',
+                            fixed: 'left'
+                        },
+                        {
+                            field: 'Worksid',
+                            title: '作业ID',
+                            sort: true,
+                            width: 120
+                        }, {
+                            field: 'Userid',
+                            title: '学生ID',
+                            sort: true,
+                            width: 120
+                        }, {
+                            field: 'Username',
+                            title: '姓名',
+                            sort: true,
+                            width: 120
+                        }, {
+                            field: 'Headphoto',
+                            title: '头像',
+                            width: 60,
+                            templet: '#imgTpl'
+                        }, {
+                            field: 'Classname',
+                            title: '班级名称',
+                            sort: true,
+                            width: 200
+                        }, {
+                            field: 'Coursename',
+                            title: '对应课程',
+                            sort: true,
+                            width: 177
+                        }, {
+                            field: 'Status',
+                            title: '状态',
+                            sort: true,
+                            width: 100,
+                            templet: '#StatusTpl'
+                        },
+                        {
+                            field: 'Score',
+                            title: '分数',
+                            sort: true,
+                            width: 70,
+                        },
+                        {
+                            field: 'Teachername',
+                            title: '批改人',
+                            sort: true,
+                            width: 120
+                        }, {
+                            field: 'Comment',
+                            title: '点评',
+                            sort: true,
+                            width: 80
+                        }, {
+                            field: 'Addtime',
+                            title: '提交时间',
+                            sort: true
+                        },
+                        {
+                            fixed: 'right',
+                            title: '操作',
+                            toolbar: '#barEdit',
+                            width: 150
+                        }
+                    ]
+                ],
+                response: {
+                    statusCode: 99999,
+                    countName: 'totalNum'
+                },
+                request: {
+                    pageName: 'pageNum'
+                },
+                totalRow: true,
+                text: {
+                    none: '暂无更多数据' //默认：无数据。注：该属性为 layui 2.2.5 开始新增
+                },
+                defaultToolbar: [] //右侧工具栏置空
+                    ,
+                parseData: function (data) {
+                    //对数据进行处理
+                    if (data.code != 99999) {
+                        alert("get workList ERROR");
+                        return;
+                    }
+                    if (!data.data || data.data.length == 0) {
+                        data.data = [];
+                    }
+                    let newdata = data.data.forEach(element => {
+                        element.Status = element.Status == 0 ? "未批改" : element.Status == 1 ?
+                            "批改中" : "已批改"
+                        //date.pattern("yyyy-MM-dd hh:mm:ss")
+                        element.Addtime = new Date(element.Addtime).pattern(
+                            "yyyy-MM-dd hh:mm")
+                        return element;
+                    });
+                    //console.log(newdata)
+                    return newdata;
+                }
+            });
+        },
+        //头工具栏事件
+        setToolbarEvent: function (table) {
+
+            table.on('toolbar(workListTable)', function (obj) {
+                console.log("头部栏 属性 ");
+                console.log(obj)
+                let checkStatus = table.checkStatus(obj.config.id);
+                console.log("checkStatus")
+                console.log(checkStatus)
+                let data = checkStatus.data;
+                switch (obj.event) {
+                    case 'getCheckData':                     
+                        layer.alert(JSON.stringify(data));
+                        break;
+                    case 'beginJudgeWorks':
+
+                        for(let arowData of data){
+                            // 无法获取更新obj 回调 值为空
+                            arowData.cb = (event) =>{};
+                            WWQueue.push(arowData);
+                        }
+                        method.beginJudge({q:true});
+                        break;
+                    case 'isAll':
+                        layer.msg(checkStatus.isAll ? '全选' : '未全选');
+                        break;
+                };
+            });
+        },
+
+        //侧边工具栏事件
+        setToolbEvent: function (table) {
+
+            table.on('tool(workListTable)', function (obj) {
+                console.log("侧边栏")
+                console.log(JSON.stringify(obj))
+                //var checkStatus = table.checkStatus(obj.config.id);
+                var data = obj.data;
+                //console.log(obj)
+                if (obj.event == 'setNoComment') {
+                    layer.confirm('确定将作业' + data.Worksid + "批改人：" + data.Teachername + "设为未点评 ",
+                        function (index) {
+                            method.setNoComment(G$, data.Worksid, event => {
+                                if (event.code == 99999) {
+                                    Glayer.msg("设置成功 : " + event.data, {
+                                        icon: 1
+                                    })
+                                }
+                            });
+                            layer.close(index);
+                        });
+                } else if (obj.event === 'answer') {
+                    method.getWorkById(G$, data.Worksid, event => {
+                        let Warea;
+                        let Woffset;
+                        if (!layui.data("optionTable")['WWStatus']) {
+                            Warea = [windowW * 0.75 + "px", windowH + "px"];
+                            Woffset = 'lt';
+                        } else {
+                            let WWStatus = layui.data("optionTable")['WWStatus'];
+                            Warea = [WWStatus.weith + 'px', WWStatus.height + 'px'];
+                            Woffset = [WWStatus.top, WWStatus.left];
+                        }
+                        Glayer.open({
+                            type: 2,
+                            title: "Answerfile:" + event.data.Answerfile,
+                            content: `https://code.knowbox.cn/scratch/index.html?teacherHelp=true&workFile=` +
+                                event.data.Answerfile,
+                            area: Warea,
+                            offset: Woffset,
+                            shade: 0,
+                            maxmin: true,
+                            moveOut: true,
+
+
+                        })
+                    })
+
+                }
+
+            });
+        },
+
+        //获取助教
+        getAllTeacherList: function ($, cb) {
+            $.ajax({
+                url: getAllTeacherListUrl,
+                method: "POST",
+                data: {
+                    pageNum: 0
+                },
+                success: function (d) {
+                    cb(d);
+                },
+                error: function (e) {
+                    alert("getAllTeacherList ERROR");
+                }
+            })
+        },
+
+        //获取所有课程
+        getAllCourseList: function ($, cb) {
+            $.ajax({
+                url: getAllCourseListUrl,
+                method: "POST",
+                success: function (d) {
+                    cb(d);
+                },
+                error: function (e) {
+                    alert("getAllTeacherList ERROR");
+                }
+            })
+        },
+
+        //根据课程获取课节 CourseId
+        getLessonListByCourseId: function ($, CourseId, cb) {
+            $.ajax({
+                url: getLessonListByCourseIdUrl,
+                method: "POST",
+                data: {
+                    courseId: CourseId
+                },
+                success: function (d) {
+                    //console.log("lessonData:"+JSON.stringify(d))
+                    cb(d);
+                },
+                error: function (e) {
+                    alert("getLessonListByCourseId ERROR");
+                }
+            })
+        },
+
+        // //根据课节id获取aLL 小节 LessonId
+        getLessonSectionListByLessonId: function ($, LessonId, cb) {
+            $.ajax({
+                url: getLessonSectionListByLessonIdUrl,
+                method: "POST",
+                data: {
+                    lessonId: LessonId
+                },
+                success: function (d) {
+                    cb(d);
+                },
+                error: function (e) {
+                    alert("getLessonSectionListByLessonId ERROR");
+                }
+            })
+        },
+
+        setNoComment: function ($, workId, cb) {
+            //设置未点评
+
+            $.ajax({
+                url: setUnCheckUrl,
+                type: "post",
+                data: {
+                    worksId: workId
+                },
+                success: function (data) {
+                    if (data.code == 99999) {
+                        layer.msg("设置未点评成功", {
+                            icon: 1,
+                            offset: '15px'
+                        })
+                        layer.close(wwIndex);
+                        layer.close(index);
+                        cb(data);
+                    }
+
+                }
+            })
+
+        },
+
+        getWork: function ($, worksId, cb) {
+            $.ajax({
+                url: getWorkUrl,
+                type: "post",
+                data: {
+                    token: tokenT,
+                    worksId: worksId
+                },
+                success: function (data) {
+                    if (data.code == 99999) {
+                        //geted work
+                        cb(true);
+                    } else {
+                        cb(false)
+                    }
+                }
+            })
+        },
+
+        //获取详情 ....
+        getWorkById: function ($, worksId, cb) {
+            $.ajax({
+                url: getWorkByIdUrl,
+                type: "post",
+                data: {
+                    worksId: worksId
+                },
+                success: function (data) {
+                    cb(data)
+                },
+                error: function (e) {
+                    alert("getWorkById ERROR")
+                }
+            })
+        },
+
+        getWindwosStatus: function (layero) {
+            let height = $(layero.selector).height();
+            let weith = $(layero.selector).width();
+            let top = $(layero.selector).offset().top;
+            let left = $(layero.selector).offset().left;
+            console.table(height, weith, top, left);
+            return {
+                height,
+                weith,
+                top,
+                left
+            }
+        },
+
+        openWorkWindows: function (layer, work, cb) {
+            let Warea;
+            let Woffset;
+            if (!layui.data("optionTable")['WWStatus']) {
+                Warea = [windowW * 0.75 + "px", windowH + "px"];
+                Woffset = 'lt';
+            } else {
+                let WWStatus = layui.data("optionTable")['WWStatus'];
+                Warea = [WWStatus.weith + 'px', WWStatus.height + 'px'];
+                Woffset = [WWStatus.top, WWStatus.left];
+            }
+            // let wHight = windowH + "px";
+            // let wWeith = windowW * 0.75 + "px";
+            let wIndex = GZIndex;
+            GZIndex -= 10 ;
+            console.log("GIndex :"+ GZIndex);
+            onlineNum ++ ;
+            layer.open({
+                type: 2,
+                title: work.Worksid + ":" + work.Coursename,
+                content: 'https://code.knowbox.cn/scratch/index.html?teacherHelp=true&workId=' + work
+                    .Worksid,
+                area: Warea,
+                offset: Woffset,
+                shade: 0,
+                maxmin: true,
+                moveOut: true,
+                //id: work.Worksid, //防止重复弹出
+                zIndex: wIndex,
+                success: function (layero, index) {
+                    console.log("WW 开启", layero, index);
+                    cb({
+                        index: index
+                    });
+                },
+                moveEnd: function (layero) {
+                    console.log("移动结束");
+                    let WStatus = method.getWindwosStatus(layero);
+                    console.log(WStatus)
+                    layui.data("optionTable", {
+                        key: 'WWStatus',
+                        value: WStatus
+                    })
+                },
+                resizing: function (layero) {
+                    //触发过于灵敏，暂停此方法
+                    //console.log("拉伸窗体;"+layero);
+                    let WStatus = method.getWindwosStatus(layero);
+                    console.log(WStatus)
+                    layui.data("optionTable", {
+                        key: 'WWStatus',
+                        value: WStatus
+                    })
+                },
+                cancel: function () {
+                    //主动关闭WW，设置未点评  ge P
+
+                },
+                end:function(){
+                    onlineNum -- ;
+                    method.beginJudge({q:1});
+                }
+            })
+        },
+
+        openJudgeWindows: function (layer, work, wwIndex, cb) {
+            let Warea;
+            let Woffset;
+            if (!layui.data("optionTable")['JWStatus']) {
+                Warea = [windowW * 0.25 + "px", windowH + "px"];
+                Woffset = 'lt';
+            } else {
+                let WWStatus = layui.data("optionTable")['JWStatus'];
+                Warea = [WWStatus.weith + 'px', WWStatus.height + 'px'];
+                Woffset = [WWStatus.top, WWStatus.left];
+            }
+            // let wHight = windowH + "px";
+            // let wWeith = windowW * 0.25 + "px";
+
+            let wIndex = GZIndex;
+            console.log("JW work data:", work);
+            let index = layer.index + 1;
+            G$.get("/src/views/home/judgePage.html", function (str) {
+                layer.open({
+                    type: 1,
+                    shade: 0,
+                    offset: Woffset,
+                    zIndex: wIndex,
+                    moveOut: true,
+                    maxmin: true,
+                    title: "sectionId :" + work.Sectionid + " worksId: " + work.Worksid,
+                    content: `<input id="sectionId" value="${work.Sectionid}" 
+                    data-index=${index} 
+                    data-wwindex=${wwIndex} 
+                    data-workid=${work.Worksid} 
+                    data-userid=${work.Userid} 
+                    data-username=${work.Username} 
+                    style="display: none">` +
+                        str,
+                    // area: ['400px', '800px'],
+                    area: Warea,
+                    cancel: function (index, layero) {
+                        // if (confirm('确定要关闭么')) { //只有当点击confirm框的确定时，该层才会关闭
+                        //     layer.close(index)
+                        // }
+                        // return false;
+                        //console.log("联动关闭" + wwIndex);
+                        layer.close(wwIndex);
+                    },
+                    moveEnd: function (layero) {
+                        console.log("移动结束");
+                        let WStatus = method.getWindwosStatus(layero);
+                        console.log(WStatus)
+                        layui.data("optionTable", {
+                            key: 'JWStatus',
+                            value: WStatus
+                        })
+                    },
+                    resizing: function (layero) {
+                        //触发过于灵敏，不建议使用此方法
+                        //console.log("拉伸窗体;"+layero);
+                        let WStatus = method.getWindwosStatus(layero);
+                        console.log(WStatus)
+                        layui.data("optionTable", {
+                            key: 'JWStatus',
+                            value: WStatus
+                        })
+                    },
+                    end: function () {
+                        //console.log("窗口销毁");
+                        //layer.close(wwIndex);
+                        //状态更新
+                        cb();
+                    }
+                    // offset: 'rt'
+                });
+
+            })
+
+        },
+
+        // 尝试打开 JW  zIndex 是窗口的zindex 属性
+        tryOpenJudgeWindows: function () {
+            if (haveOpened) {
+                return false;
+            }
+            if(JWQueue.length == 0){
+                return false;
+            }
+            let work = JWQueue.shift();
+            if (!work) {
+                Glayer.msg("JW 队列 异常 ERROR")
+                return false;
+            }
+
+            haveOpened = true;
+            let worksId = work.Worksid;
+            let wwIndex = work.wwIndex;
+            let cb = work.cb;
+            //应该怎么做呀？？？ 
+            console.log("传入wwIndex:" + wwIndex)
+            method.openJudgeWindows(layer, work, wwIndex,
+                () => {
+                    //状态更新
+                    let Teachername = layui.data("teacherTable")
+                        .userInfo.Username || "";
+                    method.getWorkById(G$, worksId, event => {
+                        event.data.Teachername = Teachername;
+                        cb(event)
+                    });
+                    //打开窗口 状态 设为 false
+                    haveOpened = false;
+                    //尝试 新的 tryOpen  回调 为 空 
+                    method.tryOpenJudgeWindows()
+                })
+        },
+
+        //打开作业  opt = {}
+        beginJudge: function (opt) {
+            let teacherTable = layui.data('teacherTable');
+            //console.log("teacherTable: " + JSON.stringify(teacherTable));
+            let token = teacherTable.token;
+            if(WWQueue.length == 0){
+                // 已经没有任务了，，队列 为空
+                //Glayer.msg("计划任务以全部打开" ,{icon:1})
+                console.log("计划任务以全部打开");
+                return ;
+            }
+            if(onlineNum >= maxOnlineNum){
+                console.log("超过最大打开数");
+                return ;
+            }
+            let work = WWQueue.shift();
+            let worksId = work.Worksid;
+            console.log("剩余 works: " + WWQueue.length)
+            console.log(WWQueue)
+            G$.ajax({
+                url: getWorkUrl,
+                type: "post",
+                data: {
+                    token: token,
+                    worksId: worksId
+                },
+                success: function (data) {
+                    if (data.code == 99999) {
+                        Glayer.msg('作业ID: ' + worksId, {
+                            icon: 1
+                        });
+
+                        method.openWorkWindows(layer, work, event => {
+                            console.log("收到event:" + event)
+                            let wwIndex = event.index;
+                            //将 回调 和 wwIndex 放入 work 中 备用 ! cb 已经 设置过了
+                            //work.cb = cb;
+                            work.wwIndex = wwIndex;
+                            //推入 队列
+                            JWQueue.push(work);
+                            // 尝试打开 JW
+                            //TODO
+                            //  cb  是在 双击 打开 时 传进来 更新表格的回调
+
+                            method.tryOpenJudgeWindows();
+                            //判断 是否 是队列 打开
+                            if(opt.q){
+                                setTimeout(()=>{
+                                    method.beginJudge(opt)
+                                },divTime)
+                            }
+                        });
+                    } else {
+                        Glayer.msg('获取失败: ' + worksId + data.data, {
+                            offset: '15px',
+                            icon: 2
+                        });
+                        //状态更新
+                        method.getWorkById(G$, worksId, work.cb);
+                    }
+                },
+                error: function (e) {
+                    alert("beginJudge ERROR " + e)
+                }
+            })
+
+        }
+
+    }
+
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    // ==================== layui =========================================
+    layui.use(['form', 'layedit', 'laydate', 'table', 'jquery'], function () {
+        var $ = layui.$,
+            form = layui.form,
+            layer = layui.layer,
+            layedit = layui.layedit,
+            laydate = layui.laydate,
+            table = layui.table
+        laytpl = layui.laytpl;
+        Glayer = layer;
+        G$ = $;
+
+        form.render(null, 'component-form-group');
+
+
+        init();
+
+        //验证登录
+        checkLoginStatus();
+
+
+        // -------------------- do anything -----------------------
+
+        //监听form select 选择
+        form.on('select(allCourseListSelect)', function (data) {
+            let CourseId = data.value;
+            method.getLessonListByCourseId($, CourseId, d => {
+                laytpl(templateOption.innerHTML).render({
+                    data: d,
+                    value: "Lessonid",
+                    name: "Lessonname"
+                }, htmls => {
+                    //console.log("lesson:"+htmls)
+                    $("#allLessonListSelect").html(`<option value="0">全部课节</option>` +
+                        htmls);
+                    form.render(null, 'component-form-group');
+                })
+            })
+        });
+
+        form.on('select(allLessonListSelect)', function (data) {
+            console.log("allLessonListSelect change ")
+            let LessonId = data.value;
+            method.getLessonSectionListByLessonId($, LessonId, d => {
+                laytpl(templateOption.innerHTML).render({
+                    data: d,
+                    value: "Sectionid",
+                    name: "Sectionname"
+                }, htmls => {
+                    //console.log("teach:"+htmls)
+                    $("#allSectionListSelect").html(`<option value="0">全部小节</option>` +
+                        htmls);
+                    form.render(null, 'component-form-group');
+                })
+            })
+        });
+
+        laydate.render({
+            elem: '#sub-laydate-range-datetime',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm',
+            range: true
+        });
+        laydate.render({
+            elem: '#cor-laydate-range-datetime',
+            type: 'datetime',
+            format: 'yyyy-MM-dd HH:mm',
+            range: true
+        });
+
+        method.getAllTeacherList($, d => {
+            laytpl(templateOption.innerHTML).render({
+                data: d,
+                value: "Teacherid",
+                name: "Username"
+            }, htmls => {
+                //console.log("teach:"+htmls)
+                $("#allTeacherListSelect").html(`<option value="0">全部助教</option>` + htmls);
+                form.render(null, 'component-form-group');
+            })
+        })
+        method.getAllCourseList($, d => {
+            laytpl(templateOption.innerHTML).render({
+                data: d,
+                value: "Courseid",
+                name: "Coursename"
+            }, htmls => {
+                //console.log("teach:"+htmls)
+                $("#allCourseListSelect").html(`<option value="0">全部课程</option>` + htmls);
+                form.render(null, 'component-form-group');
+            })
+        })
+
+
+        form.on('submit(getWorkList)', function (data) {
+
+
+            console.log("嘿嘿IEhi")
+            // console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+            // console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+            console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+            let adata = method.dataOpt(data.field);
+            method.showWorkListTable(table, adata);
+            method.setToolbarEvent(table);
+            method.setToolbEvent(table);
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+
+
+        //双击打开
+        table.on('rowDouble(workListTable)', function (obj) {
+            let data = obj.data;
+            console.log("双击...")
+            console.log(obj)
+            //TODO  获取权限
+            //console.log(JSON.stringify(data));
+            let Worksid = data.Worksid;
+            let sectionId = data.Sectionid;
+            //标注行
+            obj.tr.addClass('layui-table-click') //.siblings().removeClass('layui-table-click');
+
+            if (data.Status == "已批改") {
+
+                obj.tr.addClass('layui-table-click');
+                if (data.Teachername != layui.data("teacherTable", "userInfo").Username) {
+                    layer.msg("这个批改过了哦~~~", {
+                        icon: 2
+                    });
+                    return;
+                }
+
+            }
+            if (data.Status == "批改中") {
+                if (data.Teachername != layui.data("teacherTable", "userInfo").Username) {
+                    layer.msg("这个批改过了哦~~~", {
+                        icon: 2
+                    });
+                    //对于批改中的作业，更新其状态
+                    console.log("workID:" + data.Worksid);
+                    method.getWorkById($, data.Worksid, event => {
+                        obj.update({
+                            Status: event.data.Status == 0 ? "未批改" : event.data
+                                .Status ==
+                                1 ?
+                                "批改中" : "已批改",
+                            Score: event.data.Score,
+                            Comment: event.data.Comment,
+                            Teachername: event.data.Teachername
+                        })
+                    })
+                    return;
+                }
+
+            }
+            data.cb = (event) =>{
+                console.log(JSON.stringify(event));
+                //let Teachername = layui.data("teacherTable").userInfo.Username||"";
+                obj.update({
+                    Status: event.data.Status == 0 ? "未批改" : event.data.Status == 1 ?
+                        "批改中" : "已批改",
+                    Score: event.data.Score,
+                    Comment: event.data.Comment,
+                    Teachername: event.data.Teachername
+                })
+            }
+            WWQueue.push(data);
+            // 这里 测试，假装 是 队列 
+            method.beginJudge({ q : true});
+
+
+        })
+
+    })
+    //自定义Date拓展属性
+    Date.prototype.pattern = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份         
+            "d+": this.getDate(), //日         
+            "h+": this.getHours() % 12 == 0 ? 12 : this.getHours() % 12, //小时         
+            "H+": this.getHours(), //小时         
+            "m+": this.getMinutes(), //分         
+            "s+": this.getSeconds(), //秒         
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度         
+            "S": this.getMilliseconds() //毫秒         
+        };
+        var week = {
+            "0": "/u65e5",
+            "1": "/u4e00",
+            "2": "/u4e8c",
+            "3": "/u4e09",
+            "4": "/u56db",
+            "5": "/u4e94",
+            "6": "/u516d"
+        };
+        if (/(y+)/.test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        }
+        if (/(E+)/.test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? "/u661f/u671f" :
+                "/u5468") : "") + week[this.getDay() + ""]);
+        }
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k])
+                    .length)));
+            }
+        }
+        return fmt;
+    }
+</script>

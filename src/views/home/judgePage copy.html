@@ -1,0 +1,541 @@
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+
+
+            <div class="layui-tab layui-tab-card">
+                <ul class="layui-tab-title">
+                    <li>Before</li>
+                    <li class="layui-this">Normal</li>
+                    <li>Under</li>
+                    <li>Self</li>
+                </ul>
+                <div class="layui-tab-content" id="commentContent">
+                    <div class="layui-tab-item" id="BeforeContent">
+                        <div class="layui-card">
+                            <div class="layui-card-body">
+                                <div class="layui-btn-container">
+                                    还没加载出来 or 出错了
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item layui-show" id="NormalContent">
+                        <div class="layui-card">
+                            <div class="layui-card-body">
+                                <div class="layui-btn-container">
+                                    还没加载出来 or 出错了
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item" id="UnderContent">
+                        <div class="layui-card">
+                            <div class="layui-card-body">
+                                <div class="layui-btn-container">
+                                    <!-- <button class="layui-btn layui-btn-fluid">当春乃发生</button> -->
+                                    还没加载出来 or 出错了
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-tab-item" id="SelfContent">
+                        <div class="layui-card">
+                            <div class="layui-card-body">
+                                <div class="layui-btn-container">
+                                    <!-- <button class="layui-btn layui-btn-fluid">当春乃发生</button> -->
+                                    还没加载出来 or 出错了
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-card">
+                <div class="layui-card-header">分数</div>
+                <div class="layui-card-body">
+                    <div id="scoreInput" class="demo-slider"></div>
+                </div>
+            </div>
+
+            <div class="layui-card">
+                <div class="layui-card-header">
+                    <form class="layui-form" lay-filter="component-form-group" οnsubmit="return noJump();">
+                        <div class="layui-input-block">
+                            <button id="submitComment" class="layui-btn layui-btn-radius layui-btn-sm">确定</button>
+                            <button id="resetComment" class="layui-btn layui-btn-radius layui-btn-sm">重置</button>
+                            <button id="setNoComment"
+                                class="layui-btn layui-btn-radius layui-btn-sm layui-btn-danger">取消</button>
+                            <input id="sendBtn" type="checkbox" lay-filter="sendBtn" lay-text="YES|NO" name="sendMsg"
+                                title="推送">
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-body">
+                    <form class="layui-form" οnsubmit="return noJump()">
+                        <!-- <div class="layui-form-item"> -->
+                        <!-- <label class="layui-form-label">选项</label> -->
+                        <!-- <div class="layui-input-inline"> -->
+                        <!-- <input type="checkbox" name="" title="总结" checked> -->
+                        <!-- <input type="checkbox" name="" title="建议" checked> -->
+
+                        <!-- </div> -->
+                        <!-- </div> -->
+                        <div class="layui-form-item layui-form-text">
+                            <!-- <div class="layui-input-inline"> -->
+                            <textarea cols="20" style=" height:200px" id="commentTextarea" name="commentStr"
+                                placeholder="点评内容" class="layui-textarea"></textarea>
+                            <!-- </div> -->
+                        </div>
+                        <input type="button" id="addComment" class="layui-btn layui-btn-radius layui-btn-sm"
+                            lay-filter="addComment" value="新增">新增</input type="button">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- layui-btn-normal  -->
+<script id="templateBtn" type="text/html">
+    <!-- <div class="layui-card">
+        <div class="layui-card-header"></div>
+        <div class="layui-card-body"> -->
+<div class="layui-btn-container">
+    {{#  layui.each(d.commentList, function(index, item){ }}
+    <button class="layui-btn layui-btn-fluid layui-btn-sm  {{d.btnStyle}}" id="JJ{{item.Id}}" style="overflow:hidden;"
+        data-comment_str='{{item.Comment}}'>{{item.Title +' : '+ item.Comment}}</button>
+    {{# });}}
+</div>
+<!-- </div>
+    </div> -->
+</script>
+<script>
+    var $ = null;
+    var commentData = null;
+    var workScore = 65;
+    var index = null;
+    var wwIndex = null;
+    var Userid = null;
+    var Username = null;
+    var worksId = null;
+    var getSectionCommentBySectionIdUrl = `http://cbadminapi.knowbox.cn/v1/sectionComment/getSectionCommentBySectionId`;
+    //点评作业 worksId isRight comment score
+    var modifyUserWorkUrl = `http://cbadminapi.knowbox.cn/v1/work/modifyUserWork`;
+    //推送通知 workId teacherName
+    var sendWorkCheckUrl = `https://bianchengapi.knowbox.cn/v1/wechart/sendWorkCheckComplateRemindToUser`;
+    //设置未点评
+    var setUnCheckUrl = `http://cbadminapi.knowbox.cn/v1/work/setUnCheckStudentWork`
+
+    // 颜色转换
+    function zero_fill_hex(num, digits) {
+        var s = num.toString(16);
+        while (s.length < digits)
+            s = "0" + s;
+        return s;
+    }
+
+    //防止form跳转
+    function noJump() {
+        return false;
+    }
+
+    function rgb2hex(rgb) {
+
+        if (rgb.charAt(0) == '#')
+            return rgb;
+
+        var ds = rgb.split(/\D+/);
+        var decimal = Number(ds[1]) * 65536 + Number(ds[2]) * 256 + Number(ds[3]);
+        return "#" + zero_fill_hex(decimal, 6);
+    }
+
+var templateStr = `<div class="layui-btn-container">
+    {{#  layui.each(d.commentList, function(index, item){ }}
+    <button class="layui-btn layui-btn-fluid layui-btn-sm  {{d.btnStyle}}" id="JJ{{item.Id}}" style="overflow:hidden;"
+        data-comment_str='{{item.Comment}}'>{{item.Title +' : '+ item.Comment}}</button>
+    {{# });}}
+</div>`
+    var renderTemplate = function (laytpl, data, contentId, btnStyle) {
+
+        laytpl(templateStr).render({
+            commentList: data,
+            btnStyle: btnStyle,
+        }, htmls => {
+            //console.log("html: BTN: " + htmls)
+            console.log("Contend for: "+contentId)
+            $("#" + contentId).html(htmls);
+        })
+    }
+    var setCommonComment = function (commonComment) {
+        //固定格式
+        $("#commentTextarea").val("一、课程总结\n" + commonComment + "\n二、优化建议\n");
+    }
+
+    //初始化
+    function judgeWindowsInit() {
+        let sendMsg = layui.data("optionTable", "sendMsg");
+        console.log("Init sendMsg 状态" + sendMsg)
+        if (sendMsg) {
+            $('#sendBtn').attr("checked", 'checked');
+        } else {
+            $('#sendBtn').attr("checked", false);
+        }
+        index = $("#sectionId").data("index");
+        wwIndex = $("#sectionId").data("wwindex");
+        Userid = $("#sectionId").data("userid");
+        Username = $("#sectionId").data("username");
+        worksId = $("#sectionId").data("workid")
+
+        console.log("index: ", index, "wwIndex", wwIndex, "Userid", Userid, "Username", Username);
+    }
+
+    //===================== layui =========================
+    layui.use(['slider', 'laytpl', 'form'], function () {
+        var element = layui.element,
+            laytpl = layui.laytpl,
+            form = layui.form;
+
+
+        slider = layui.slider;
+        $ = layui.$;
+
+        //init  
+        judgeWindowsInit();
+
+        //渲染form
+        form.render(null, 'component-form-group');
+
+        let sectionId = $("#sectionId").val();
+        // console.log("sectionId : " + sectionId)
+        slider.render({
+            elem: '#scoreInput',
+            //最小值
+            min: 40,
+            //最大值
+            max: 100,
+            //步长
+            step: 5,
+            //默认值
+            value: 65,
+            //开启间隔点
+            showstep: true, //输入框
+            input: true,
+            theme: '#1E9FFF',
+            setTips: function (value) { //自定义提示文本
+                return value;
+            },
+            change: function (value) {
+                //TODO  设置分数框数值
+                console.log("secore: " + workScore);
+                workScore = value;
+            }
+        });
+
+        //监听add 按钮
+        form.on("submit(addComment)", function (data) {
+            console.log("监听 add 提交" + JSON.stringify(data));
+            return false;
+        })
+
+        //加载 button 
+        //renderTemplate
+        $.ajax({
+            url: getSectionCommentBySectionIdUrl,
+            type: "post",
+            data: {
+                sectionId: sectionId
+            },
+            success: function (data) {
+                //对data  分类处理
+                if (data.code != 99999) {
+                    layer.alert("获取话术失败" + data.msg);
+                }
+                commentData = data;
+                //更新输入栏  默认话术
+                setCommonComment(data.data.SectionComment.Comment);
+
+                //渲染按钮话术
+                if (data.data.BeForSectionComment) {
+                    renderTemplate(laytpl, [data.data.BeForSectionComment], "BeforeContent",
+                        "layui-btn-normal")
+                }
+                if (data.data.NormalSectionComment) {
+                    renderTemplate(laytpl, data.data.NormalSectionComment, "NormalContent", "")
+                }
+                if (data.data.UnderSectionComment) {
+                    renderTemplate(laytpl, data.data.UnderSectionComment, "UnderContent",
+                        "layui-btn-danger")
+                }
+
+                //TODO 本地缓存话术
+                let selfCommentTable = layui.data("selfCommentTable");
+                if (selfCommentTable) {
+                    let selfComment = selfCommentTable["self" + sectionId] || [];
+                    let allComment = selfCommentTable["selfall"] || [];
+                    let comments = allComment.concat(selfComment);
+                    renderTemplate(laytpl, comments, "SelfContent", "")
+                }
+            }
+        })
+
+        //推送 chekbox
+        $("#sendBtn").on("change", function () {
+            var $checkbox = $("#sendBtn");
+            //console.log($checkbox)
+            //console.log($checkbox.attr('checked'));
+            console.log($checkbox.get(0).checked)
+            let checked = $checkbox.get(0).checked;
+            layui.data("optionTable", {
+                key: "sendMsg",
+                value: checked
+            });
+            console.log(layui.data("sendmsg 状态: " + "option", "sendMsg"));
+        });
+        //换一种方式 设置 checkbox
+        form.on("checkbox(sendBtn)", function (obj) {
+            console.log("form checkbox change ")
+            console.log("value:" + JSON.stringify(obj))
+            var $checkbox = $("#sendBtn");
+            //console.log($checkbox)
+            //console.log($checkbox.attr('checked'));
+            console.log($checkbox.get(0).checked)
+            let checked = $checkbox.get(0).checked;
+            layui.data("optionTable", {
+                key: "sendMsg",
+                value: checked
+            });
+            console.log(layui.data("sendmsg 状态: " + "option", "sendMsg"));
+        })
+        //鼠标点击按钮
+        $("#commentContent").on("click", "button", function () {
+
+            if ($(this).hasClass("layui-btn-disabled")) return;
+            let commentStr = $(this).data("comment_str");
+            let sectionComments = $("#commentTextarea").val();
+            //console.log(sectionComments);
+            $("#commentTextarea").val(sectionComments + commentStr);
+            $(this).addClass("layui-btn-disabled");
+        })
+
+        //设置未点评
+        $("#setNoComment").on("click", function () {
+            let workId = $("#sectionId").data("workid");
+            $.ajax({
+                url: setUnCheckUrl,
+                type: "post",
+                data: {
+                    worksId: workId
+                },
+                success: function (data) {
+                    if (data.code == 99999) {
+                        layer.msg("设置未点评成功", {
+                            icon: 1,
+                            offset: '15px'
+                        })
+                        layer.close(wwIndex);
+                        layer.close(index);
+                    }
+
+                }
+            })
+        })
+        // 鼠标悬浮
+        $("#commentContent").on("mouseover", "button", function (e) {
+            let color = $(this).css("background-color");
+            let hexColor = rgb2hex(color);
+            let commentStr = $(this).data("comment_str");
+            layer.tips(commentStr, this, {
+                tips: [4, hexColor],
+                anim: 3,
+                time: 5000
+            });
+        })
+        //鼠标离开
+        $("#commentContent").on("mouseleave", "button", function (e) {
+            layer.closeAll('tips');
+        })
+
+        //重置按钮
+        $("#resetComment").on("click", function (e) {
+            $("#commentContent button").removeClass("layui-btn-disabled");
+            setCommonComment(commentData.data.SectionComment.Comment);
+        })
+
+        //新增话术
+        $("#addComment").on("click", function (e) {
+            let sectionComments = $("#commentTextarea").val();
+            let Warea;
+            let Woffset;
+            if (!layui.data("optionTable")['AWStatus']) {
+                Warea = [300 + "px", 500 + "px"];
+                Woffset = 'auto';
+            } else {
+                let WWStatus = layui.data("optionTable")['AWStatus'];
+                Warea = [WWStatus.weith + 'px', WWStatus.height + 'px'];
+                Woffset = [WWStatus.top, WWStatus.left];
+            }
+            layer.open({
+                type: 1,
+                area: Warea,
+                offset: Woffset,
+                content: `
+<div class="layui-card">
+    <div class="layui-card-body" style="padding: 15px;">
+        <form class="layui-form layui-form-pane " action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">title</label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" id="newCommentTitle" autocomplete="off" placeholder="请输入标题" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">sectionId</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="username" id="newCommentSection" value=${sectionId} lay-verify="required" placeholder="请输入SectionId" autocomplete="off"
+                        class="layui-input">
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">文本域</label>
+                <div class="layui-input-block">
+                    <textarea id="newComment" placeholder="请输入新增话术内容" value=${sectionComments} class="layui-textarea"></textarea>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+    `,
+                btn: ["确定", "取消"],
+                success: function () {
+                    $("#newComment").val(sectionComments);
+                },
+                yes: function (index, data) {
+                    let newCommentSection = $("#newCommentSection").val();
+                    let newComment = $("#newComment").val();
+                    let newCommentTitle = $("#newCommentTitle").val();
+                    console.log(newCommentSection, "=====", newCommentTitle)
+                    let selfCommentTable = layui.data("selfCommentTable");
+                    // console.log("selfCommentTable: "+JSON.stringify(selfCommentTable))
+                    if (!selfCommentTable['self' + newCommentSection]) {
+                        //如果是空，则添加[]
+                        layui.data("selfCommentTable", {
+                            key: 'self' + newCommentSection,
+                            value: [{
+                                'Title': newCommentTitle,
+                                'Comment': newComment,
+                                'SectionId': newCommentSection
+                            }]
+                        });
+                    } else {
+                        let selfSectionCommentList = selfCommentTable['self' +
+                            newCommentSection];
+                        selfSectionCommentList.push({
+                            Title: newCommentTitle,
+                            Comment: newComment,
+                            SectionId: newCommentSection
+                        });
+                        layui.data("selfCommentTable", {
+                            key: 'self' + newCommentSection,
+                            value: selfSectionCommentList
+                        });
+                    }
+                    layer.msg("成功保存自定义话术", {
+                        icon: 1
+                    });
+                    layer.close(index);
+
+                },
+                moveEnd: function (layero) {
+                    //console.log("移动结束");
+                    let WStatus = method.getWindwosStatus(layero);
+                    //console.log(WStatus)
+                    layui.data("optionTable", {
+                        key: 'AWStatus',
+                        value: WStatus
+                    })
+                },
+                resizing: function (layero) {
+                    //触发过于灵敏，不建议使用此方法
+                    //console.log("拉伸窗体;"+layero);
+                    let WStatus = method.getWindwosStatus(layero);
+                    //console.log(WStatus)
+                    layui.data("optionTable", {
+                        key: 'AWStatus',
+                        value: WStatus
+                    })
+                },
+            })
+        })
+        //点评作业  
+        $("#submitComment").on("click", function (e) {
+            let sectionComments = $("#commentTextarea").val();
+            let workId = $("#sectionId").data("workid");
+            $.ajax({
+                url: modifyUserWorkUrl,
+                type: "post",
+                data: {
+
+                    worksId: workId,
+                    isRight: 0,
+                    comment: sectionComments,
+                    score: workScore
+                },
+                success: function (data) {
+                    if (data.code == 99999) {
+                        console.log("wwIndex:" + wwIndex);
+                        layer.close(wwIndex);
+                        layer.close(index);
+                        // 判断是否推送
+                        if (layui.data("optionTable", "sendMsg")) {
+
+                            let teacherName = layui.data("teacherTable", "userInfo")
+                                .Username;
+                            $.ajax({
+                                url: sendWorkCheckUrl,
+                                type: "post",
+                                data: {
+                                    workId: workId,
+                                    teacherName: teacherName
+                                },
+                                success: function (data) {
+                                    if (data.code == 99999) {
+                                        layer.msg("推送成功", {
+                                            icon: 1
+                                        });
+                                    } else {
+                                        layer.msg("推送失败: " + workId, {
+                                            icon: 2
+                                        });
+                                        let note = layui.data("layuiAdmin",
+                                            "note");
+                                        layui.data("layuiAdmin", {
+                                            key: "note",
+                                            value: note + workId + " " +
+                                                Userid + " " +
+                                                Username + "\n"
+                                        })
+                                    }
+                                }
+                            })
+                        } else {
+                            layer.msg("点评完成，不推送", {
+                                icon: 1
+                            });
+                            //保存为推送到本地,以后推送
+                            //TODO
+                        }
+                    } else {
+                        layer.msg("点评失败" + data.msg);
+                    }
+                }
+            })
+        })
+    });
+</script>
