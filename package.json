@@ -22,9 +22,9 @@
     "mocha": "^3.2.0",
     "sinon": "^3.2.1",
     "sinon-chai": "^2.13.0",
-    "express":"^6.9.0"
+    "express":"^4.17.3"
   },
   "dependencies": {
-    "express": "^4.17.0"
+    "express": "^4.17.3"
   }
 }
